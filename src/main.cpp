@@ -113,6 +113,7 @@ void SwingCradle()
   
   if(isBabyCryNotificationSent)
   {
+    digitalWrite(Pins.Buzzer,HIGH);
         int pos = 0;
         myservo.attach(Pins.ServoMotor);
         for (pos = 0; pos <= 180; pos += 1) { // goes from 0 degrees to 180 degrees
@@ -125,6 +126,7 @@ void SwingCradle()
           delay(15);                       // waits 15 ms for the servo to reach the position
         }
         myservo.detach();
+    digitalWrite(Pins.Buzzer,LOW);
   }
 }
 BLYNK_WRITE(V1)
@@ -147,6 +149,7 @@ void setup() {
   dht.begin();
   pinMode(Pins.Fan ,OUTPUT);
   pinMode(Pins.SoundSensor,OUTPUT);
+  pinMode(Pins.Buzzer,OUTPUT);
   pinMode(Pins.MoistureSensor, INPUT);
   Blynk.syncAll();
   ThingSpeak.begin(client);

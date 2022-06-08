@@ -7,6 +7,7 @@ struct Pins
     static const uint8_t MoistureSensor = D2;
     static const uint8_t SoundSensor = A0;
     static const uint8_t ServoMotor = D3;
+    static const uint8_t Buzzer = D1;
 }Pins;
 struct VirtualPins
 {
@@ -14,6 +15,4 @@ struct VirtualPins
     int TemperatureThreshold = V4;
     int Humidity = V5;
     int Temperature = V6;
-
-    
 }VirtualPins;
