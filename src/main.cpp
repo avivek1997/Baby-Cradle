@@ -17,7 +17,20 @@ Servo myservo;
 DHT dht(Pins.TemperatureSensor, DHTTYPE);
 BlynkTimer timer;
 
+void ThingsSpeakSyncAll()
+{
+  int x = ThingSpeak.writeFields(Configs.ThingsSpeak_SECRET_CH_ID, Configs.ThingsSpeak_APIKEY);
+  if (x == 200)
+  {
+    Serial.println("Channel update successful.");
+  }
+  else
+  {
+    Serial.println("Problem updating channel. HTTP error code " + String(x));
+  }
+}
 bool manualFanControl = 0;
+bool isTemperatureNotificationSent=0;
 void HandleTemperatureSensor()
 {
   float h = dht.readHumidity();
@@ -32,17 +45,18 @@ void HandleTemperatureSensor()
   Blynk.virtualWrite(VirtualPins.Humidity, h);
   Blynk.virtualWrite(VirtualPins.Temperature, t);
   ThingSpeak.setField(1, t);
-
-  int x = ThingSpeak.writeFields(Configs.ThingsSpeak_SECRET_CH_ID, Configs.ThingsSpeak_APIKEY);
-  if (x == 200)
+  ThingSpeak.setField(2, h);
+  ThingsSpeakSyncAll();
+  if(int(t) > 35 && !isTemperatureNotificationSent)
   {
-    Serial.println("Channel update successful.");
+    isTemperatureNotificationSent=1;
+    Blynk.notify(Messages.TemperatureAlert);
   }
-  else
+  else if(int(t) < 35)
   {
-    Serial.println("Problem updating channel. HTTP error code " + String(x));
+    isTemperatureNotificationSent=0;
   }
-
+  
   if (int(t) >= Configs.TemperatureThreshold && !manualFanControl)
   {
     Blynk.virtualWrite(VirtualPins.Fan, HIGH);
@@ -95,7 +109,8 @@ bool isWetBedNotificationSent = 0;
 void HandleMoistureSensor()
 {
   int currentValue = digitalRead(Pins.MoistureSensor);
-
+  ThingSpeak.setField(3,!currentValue);
+  ThingsSpeakSyncAll();
   if (!currentValue && !isWetBedNotificationSent)
   {
     Blynk.notify(Messages.BabyWetBed);
